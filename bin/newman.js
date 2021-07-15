@@ -113,21 +113,23 @@ program
         'Forces the request to be sent as HEAD, with the --data parameters appended to the query string')
     .option('-T, --upload-file <file>',
         'Forces the request to be sent as PUT with the specified local file to the server', util.cast.memoize, [])
+    .option('-r, --reporters [reporters]', 'Specify the reporters to use for this run', util.cast.csvParse, ['cli'])
     .action((url, command) => {
         const options = util.commanderToObject(command),
 
             curl = util.createCurl(options, url);
 
         options.curl = curl;
+        console.log(curl);
 
-        newman.request(options, function (err, summary) {
-            const runError = err || summary.run.error || summary.run.failures.length;
+        newman.request(options, function (err) {
+            const requestError = err;
 
             if (err) {
                 console.error(`error: ${err.message || err}\n`);
                 err.friendly && console.error(`  ${err.friendly}\n`);
             }
-            runError && !_.get(options, 'suppressExitCode') && process.exit(1);
+            requestError && !_.get(options, 'suppressExitCode') && process.exit(1);
         });
     });
 
