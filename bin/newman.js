@@ -114,22 +114,24 @@ program
     .option('-T, --upload-file <file>',
         'Forces the request to be sent as PUT with the specified local file to the server', util.cast.memoize, [])
     .option('-r, --reporters [reporters]', 'Specify the reporters to use for this run', util.cast.csvParse, ['cli'])
+    .option('--verbose', 'Show detailed information of collection run and each request sent')
     .action((url, command) => {
         const options = util.commanderToObject(command),
 
+            // convert the commander options object to a curl string
             curl = util.createCurl(options, url);
 
+        // Inject additional properties into the options object
         options.curl = curl;
-        console.log(curl);
 
         newman.request(options, function (err) {
-            const requestError = err;
+            const requestErr = err;
 
             if (err) {
                 console.error(`error: ${err.message || err}\n`);
                 err.friendly && console.error(`  ${err.friendly}\n`);
             }
-            requestError && !_.get(options, 'suppressExitCode') && process.exit(1);
+            requestErr && !_.get(options, 'suppressExitCode') && process.exit(1);
         });
     });
 
